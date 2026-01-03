@@ -187,3 +187,49 @@ resetBtn.addEventListener("click", () => {
 ============================ */
 renderTabs();
 
+/* ============================
+   EXPORT DATA TO EMAIL (CSV)
+============================ */
+const exportBtn = document.getElementById("exportBtn");
+
+exportBtn.addEventListener("click", () => {
+  let csvContent = `Athlete: ${currentUser}\n`;
+  csvContent += "Block,Day,Exercise,Weight (lbs),Status\n";
+
+  // Loop through all data to find this user's entries
+  Object.entries(programBlocks).forEach(([blockId, blockData]) => {
+    Object.entries(blockData.days).forEach(([dayNum, day]) => {
+      day.lifts.forEach(lift => {
+        const weight = localStorage.getItem(getKey(blockId, dayNum, lift + '-weight')) || "0";
+        const status = localStorage.getItem(getKey(blockId, dayNum, lift)) === "done" ? "Completed" : "Incomplete";
+        
+        // Add row to CSV
+        csvContent += `"${blockData.label}","Day ${dayNum}","${lift}","${weight}","${status}"\n`;
+      });
+      
+      // Handle StairClimber
+      const stairWeight = "N/A";
+      const stairStatus = localStorage.getItem(getKey(blockId, dayNum, "StairClimber")) === "done" ? "Completed" : "Incomplete";
+      csvContent += `"${blockData.label}","Day ${dayNum}","StairClimber","${stairWeight}","${stairStatus}"\n`;
+    });
+  });
+
+  // Create Email link
+  const subject = encodeURIComponent(`${currentUser}'s Fitness Progress - Dudek & Boyd`);
+  const body = encodeURIComponent(`Attached is my current workout progress data.\n\n--- DATA BELOW ---\n\n${csvContent}`);
+  
+  // This opens the user's email app
+  window.location.href = `mailto:?subject=${subject}&body=${body}`;
+  
+  // Optional: Also download the file directly to the phone/computer
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.setAttribute("href", url);
+  link.setAttribute("download", `${currentUser}_Progress.csv`);
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+});
+
