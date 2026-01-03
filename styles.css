@@ -220,19 +220,27 @@ footer {
   opacity: 0.5;
 }
 
-/* styles.css */
-.btn-gold {
-  background-color: var(--gold);
-  color: #121c2f;
-  font-weight: bold;
-  border-radius: 8px;
+/* ============================
+   EXPORT BUTTON STYLE FIX
+============================ */
+#exportBtn.btn-gold {
+  background-color: #f3c66b !important; /* Force high-visibility gold */
+  color: #121c2f !important;            /* Force dark navy text */
+  font-weight: 800 !important;
+  text-transform: uppercase;
+  letter-spacing: 1px;
   border: none;
-  padding: 10px;
-  transition: transform 0.2s ease;
+  padding: 12px 20px;
+  border-radius: 10px;
+  width: 80% !important;                /* Better mobile hit area */
+  margin: 20px auto;
+  display: block;                       /* Centers it as a block element */
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  opacity: 1 !important;                /* Ensure no transparency is inherited */
 }
 
-.btn-gold:hover {
-  transform: scale(1.05);
-  background-color: #e2b55a;
+#exportBtn.btn-gold:active {
+  transform: scale(0.98);
+  background-color: #e2b55a !important;
 }
 
