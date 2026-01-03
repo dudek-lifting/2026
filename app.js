@@ -119,12 +119,14 @@ function renderBlock(blockId) {
     const liftsHtml = day.lifts.map(lift => {
       const isDone = localStorage.getItem(getKey(blockId, dayNum, lift)) === "done";
       const weightVal = localStorage.getItem(getKey(blockId, dayNum, lift + '-weight')) || "";
+      const repsVal = localStorage.getItem(getKey(blockId, dayNum, lift + '-reps')) || "";
       
       return `
         <div class="lift-row ${isDone ? 'completed' : ''}" data-lift="${lift}">
           <input type="checkbox" ${isDone ? 'checked' : ''}>
           <span>${lift}</span>
           <input type="number" class="weight-input" placeholder="lbs" value="${weightVal}">
+          <input type="number" class="reps-input" placeholder="reps" value="${repsVal}">
         </div>
       `;
     }).join("");
@@ -156,8 +158,12 @@ function renderBlock(blockId) {
         }
       }
 
-      if (e.target.type === 'number') {
+      if (e.target.classList.contains('weight-input')) {
         localStorage.setItem(getKey(blockId, dayNum, liftName + '-weight'), e.target.value);
+      }
+      
+      if (e.target.classList.contains('reps-input')) {
+        localStorage.setItem(getKey(blockId, dayNum, liftName + '-reps'), e.target.value);
       }
     });
 
@@ -171,7 +177,6 @@ function renderBlock(blockId) {
 userSelect.addEventListener("change", (e) => {
   currentUser = e.target.value;
   localStorage.setItem("lastUser", currentUser);
-  // Re-run renderTabs to check for this specific user's saved phase
   renderTabs();
 });
 
@@ -194,34 +199,28 @@ const exportBtn = document.getElementById("exportBtn");
 
 exportBtn.addEventListener("click", () => {
   let csvContent = `Athlete: ${currentUser}\n`;
-  csvContent += "Block,Day,Exercise,Weight (lbs),Status\n";
+  csvContent += "Block,Day,Exercise,Weight (lbs),Reps,Status\n";
 
-  // Loop through all data to find this user's entries
   Object.entries(programBlocks).forEach(([blockId, blockData]) => {
     Object.entries(blockData.days).forEach(([dayNum, day]) => {
       day.lifts.forEach(lift => {
         const weight = localStorage.getItem(getKey(blockId, dayNum, lift + '-weight')) || "0";
+        const reps = localStorage.getItem(getKey(blockId, dayNum, lift + '-reps')) || "0";
         const status = localStorage.getItem(getKey(blockId, dayNum, lift)) === "done" ? "Completed" : "Incomplete";
         
-        // Add row to CSV
-        csvContent += `"${blockData.label}","Day ${dayNum}","${lift}","${weight}","${status}"\n`;
+        csvContent += `"${blockData.label}","Day ${dayNum}","${lift}","${weight}","${reps}","${status}"\n`;
       });
       
-      // Handle StairClimber
-      const stairWeight = "N/A";
       const stairStatus = localStorage.getItem(getKey(blockId, dayNum, "StairClimber")) === "done" ? "Completed" : "Incomplete";
-      csvContent += `"${blockData.label}","Day ${dayNum}","StairClimber","${stairWeight}","${stairStatus}"\n`;
+      csvContent += `"${blockData.label}","Day ${dayNum}","StairClimber","N/A","N/A","${stairStatus}"\n`;
     });
   });
 
-  // Create Email link
   const subject = encodeURIComponent(`${currentUser}'s Fitness Progress - Dudek & Boyd`);
   const body = encodeURIComponent(`Attached is my current workout progress data.\n\n--- DATA BELOW ---\n\n${csvContent}`);
   
-  // This opens the user's email app
   window.location.href = `mailto:?subject=${subject}&body=${body}`;
   
-  // Optional: Also download the file directly to the phone/computer
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
@@ -232,4 +231,5 @@ exportBtn.addEventListener("click", () => {
   link.click();
   document.body.removeChild(link);
 });
+
 
