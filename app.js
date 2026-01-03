@@ -48,12 +48,10 @@ const phaseTabs = document.getElementById("phaseTabs");
 const phaseContent = document.getElementById("phaseContent");
 const resetBtn = document.getElementById("resetBtn");
 
-// Load last selected user or default to Zach
+// Initialize state from Storage
 let currentUser = localStorage.getItem("lastUser") || "Zach";
 userSelect.value = currentUser;
 
-// Helper to create unique keys for LocalStorage
-// Format: "Zach-b1-d1-Deadlifts"
 function getKey(block, day, lift) {
   return `${currentUser}-b${block}-d${day}-${lift}`;
 }
@@ -63,51 +61,61 @@ function getKey(block, day, lift) {
 ============================ */
 function renderTabs() {
   phaseTabs.innerHTML = "";
-  Object.entries(programBlocks).forEach(([blockId, data], index) => {
+  
+  // Find which block this specific user was on last
+  const lastBlockForUser = localStorage.getItem(`${currentUser}-activeBlock`) || "1";
+
+  Object.entries(programBlocks).forEach(([blockId, data]) => {
     const btn = document.createElement("button");
-    btn.className = `nav-link ${index === 0 ? "active" : ""}`;
+    const isActive = blockId === lastBlockForUser;
+    
+    btn.className = `nav-link ${isActive ? "active" : ""}`;
     btn.textContent = data.label;
     
-    // When clicking a tab, render that block
     btn.onclick = () => {
-      // Update active visual state
       document.querySelectorAll(".phase-tabs .nav-link").forEach(b => b.classList.remove("active"));
       btn.classList.add("active");
+      
+      // Save this preference for THIS user
+      localStorage.setItem(`${currentUser}-activeBlock`, blockId);
       renderBlock(blockId);
     };
     
     phaseTabs.appendChild(btn);
   });
+
+  // Load the content for the active block
+  renderBlock(lastBlockForUser);
 }
 
 function renderBlock(blockId) {
   phaseContent.innerHTML = "";
   const blockData = programBlocks[blockId];
 
-  // 1. Render Week Start Input (Optional)
+  // Week Start Input
   const weekStartKey = `${currentUser}-weekStart-${blockId}`;
   const weekStartDiv = document.createElement("div");
   weekStartDiv.className = "mb-3 text-center";
   weekStartDiv.innerHTML = `
-    <label class="text-white small opacity-75">Week Start (Optional)</label>
+    <div class="small mb-2" style="color:var(--gold); font-weight:bold;">Welcome back, ${currentUser}!</div>
+    <label class="text-white small opacity-75">Week Start Date</label>
     <input type="text" 
            class="form-control form-control-sm mx-auto mt-1 text-center" 
-           placeholder="e.g. 01/02/2026" 
+           placeholder="MM/DD/YYYY" 
            style="max-width: 150px; background: rgba(255,255,255,0.1); color: white; border: none;"
            value="${localStorage.getItem(weekStartKey) || ''}">
   `;
-  // Save date on change
+  
   weekStartDiv.querySelector("input").addEventListener("input", (e) => {
     localStorage.setItem(weekStartKey, e.target.value);
   });
   phaseContent.appendChild(weekStartDiv);
 
-  // 2. Render Workout Cards
+  // Workout Cards
   Object.entries(blockData.days).forEach(([dayNum, day]) => {
     const card = document.createElement("div");
-    card.className = "card p-3";
+    card.className = "card p-3 mb-3";
     
-    // Generate HTML for lifts
     const liftsHtml = day.lifts.map(lift => {
       const isDone = localStorage.getItem(getKey(blockId, dayNum, lift)) === "done";
       const weightVal = localStorage.getItem(getKey(blockId, dayNum, lift + '-weight')) || "";
@@ -121,30 +129,23 @@ function renderBlock(blockId) {
       `;
     }).join("");
 
-    // Add StairClimber manually to every day (as per original app)
     const stairKey = getKey(blockId, dayNum, "StairClimber");
     const stairDone = localStorage.getItem(stairKey) === "done";
-    const stairHtml = `
-       <div class="lift-row mt-3 pt-2 border-top border-secondary ${stairDone ? 'completed' : ''}" data-lift="StairClimber">
-          <input type="checkbox" ${stairDone ? 'checked' : ''}>
-          <span style="color:var(--gold);">StairClimber (30 min)</span>
-       </div>
-    `;
-
+    
     card.innerHTML = `
       <div class="card-title">Day ${dayNum} — ${day.title}</div>
       ${liftsHtml}
-      ${stairHtml}
+      <div class="lift-row mt-3 pt-2 border-top border-secondary ${stairDone ? 'completed' : ''}" data-lift="StairClimber">
+          <input type="checkbox" ${stairDone ? 'checked' : ''}>
+          <span style="color:var(--gold);">StairClimber (30 min)</span>
+      </div>
     `;
 
-    // 3. Attach Event Listeners (Event Delegation)
     card.addEventListener('change', (e) => {
       const row = e.target.closest('.lift-row');
       if (!row) return;
-      
       const liftName = row.dataset.lift;
 
-      // Handle Checkbox
       if (e.target.type === 'checkbox') {
         if (e.target.checked) {
           row.classList.add("completed");
@@ -155,7 +156,6 @@ function renderBlock(blockId) {
         }
       }
 
-      // Handle Weight Input
       if (e.target.type === 'number') {
         localStorage.setItem(getKey(blockId, dayNum, liftName + '-weight'), e.target.value);
       }
@@ -166,19 +166,17 @@ function renderBlock(blockId) {
 }
 
 /* ============================
-   USER SWITCHING & RESET
+   USER SWITCHING
 ============================ */
 userSelect.addEventListener("change", (e) => {
   currentUser = e.target.value;
   localStorage.setItem("lastUser", currentUser);
-  // Re-render the current view with new user's data
-  // Find active tab to know which block to render
-  const activeTabIdx = Array.from(phaseTabs.children).findIndex(btn => btn.classList.contains("active"));
-  renderBlock(Object.keys(programBlocks)[activeTabIdx !== -1 ? activeTabIdx : 0]);
+  // Re-run renderTabs to check for this specific user's saved phase
+  renderTabs();
 });
 
 resetBtn.addEventListener("click", () => {
-  if (confirm(`Are you sure you want to clear ALL data for ALL users? This cannot be undone.`)) {
+  if (confirm(`Are you sure you want to clear ALL data for ALL users?`)) {
     localStorage.clear();
     location.reload();
   }
@@ -188,5 +186,4 @@ resetBtn.addEventListener("click", () => {
    INITIALIZATION
 ============================ */
 renderTabs();
-renderBlock("1"); // Start at Block 1
 
