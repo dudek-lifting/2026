@@ -178,21 +178,35 @@ body {
 }
 
 /* ============================
-   PHASE TABS
+   PHASE TABS (2x2 Grid Fix)
 ============================ */
+.phase-tabs {
+  display: flex;
+  flex-wrap: wrap; /* Allows tabs to wrap to the next line */
+  gap: 8px;        /* Spacing between tabs */
+  padding: 0;
+  margin: 0 auto 1.5rem auto;
+  width: 100%;
+}
+
 .phase-tabs .nav-link {
+  /* This calculation (50% minus half the gap) forces a 2x2 grid */
+  flex: 0 0 calc(50% - 4px); 
   color: var(--text-muted);
   background: rgba(255,255,255,0.05);
-  margin: 0 4px;
-  border-radius: 20px;
-  font-size: 0.9rem;
-  padding: 8px 16px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  padding: 10px 5px;
+  text-align: center;
+  border: 1px solid rgba(255,255,255,0.1);
+  transition: all 0.2s ease;
 }
 
 .phase-tabs .nav-link.active {
   background-color: var(--gold);
-  color: #121c2f; /* Dark text on gold button */
+  color: #121c2f;
   font-weight: bold;
+  border-color: var(--gold);
 }
 
 /* ============================
