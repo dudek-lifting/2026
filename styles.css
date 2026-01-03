@@ -220,3 +220,19 @@ footer {
   opacity: 0.5;
 }
 
+/* styles.css */
+.btn-gold {
+  background-color: var(--gold);
+  color: #121c2f;
+  font-weight: bold;
+  border-radius: 8px;
+  border: none;
+  padding: 10px;
+  transition: transform 0.2s ease;
+}
+
+.btn-gold:hover {
+  transform: scale(1.05);
+  background-color: #e2b55a;
+}
+
