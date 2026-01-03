@@ -1,73 +1,153 @@
+/* ============================
+   🔒 BASELINE LOCKED VERSION
+   No export • No PRs • No users
+============================ */
+
+/* GLOBAL RESET */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+}
+
 body {
+  margin: 0;
   background: #2b3b5c;
-  font-family: system-ui, sans-serif;
-  color: #fff;
+  color: #e9eef1;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
+/* APP LAYOUT */
 .app-container {
-  max-width: 900px;
-  margin: auto;
-  padding: 1.5rem;
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 1rem 1rem 2.5rem;
 }
 
+@media (min-width: 768px) {
+  .app-container {
+    max-width: 520px;
+  }
+}
+
+/* TYPOGRAPHY */
 .title {
   text-align: center;
+  margin-bottom: 0.25rem;
+  color: #f3c66b;
+}
+
+.title-main {
+  display: block;
+  font-size: 2.2rem;
   font-weight: 800;
-  color: #ffd34d;
+  letter-spacing: 0.15em;
+}
+
+.title-sub {
+  display: block;
+  font-size: 1rem;
+  font-weight: 500;
+  opacity: 0.85;
+  text-transform: uppercase;
 }
 
 .subtitle {
-  font-size: 1.1rem;
-  opacity: .85;
+  text-align: center;
+  font-size: 0.95rem;
+  opacity: 0.85;
+  margin-bottom: 1.25rem;
 }
 
+/* CARDS */
 .card {
-  background: #101a2e;
-  border-radius: 1.2rem;
+  background: linear-gradient(145deg, #182944, #1f3756);
+  border-radius: 1.1rem;
+  margin-bottom: 1.1rem;
   padding: 1rem;
-  margin-bottom: 1rem;
-  box-shadow: 0 12px 35px rgba(0,0,0,.45);
+  box-shadow: 0 12px 35px rgba(0,0,0,0.55),
+              inset 0 0 0 1px rgba(255,255,255,0.05);
+  animation: cardFadeIn 0.25s ease both;
 }
 
-.section-title {
-  color: #ffd34d;
-  margin-bottom: .75rem;
+@keyframes cardFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.phase-tabs .nav-link {
-  border-radius: 999px;
-  padding: .4rem .9rem;
-  margin: .25rem;
-  color: #fff;
+.card p {
+  margin-bottom: 0.5rem;
+  color: #f3c66b;
+  font-weight: 600;
 }
 
-.phase-tabs .nav-link.active {
-  background: #ffd34d;
-  color: #000;
-}
-
-.day-title {
-  color: #ffd34d;
-  font-weight: 700;
-}
-
+/* LIFT ROWS */
 .lift-row {
   display: flex;
   align-items: center;
-  gap: .5rem;
+  gap: 0.55rem;
+  margin-bottom: 0.75rem;
+}
+
+.lift-row span {
+  flex: 1;
+  font-size: 0.95rem;
+  color: #ffffff;
 }
 
 .lift-row.completed span {
   text-decoration: line-through;
-  opacity: .45;
+  color: rgba(255,255,255,0.5);
 }
 
-.export-btn {
-  border-radius: 999px;
-  font-weight: 700;
+.lift-row input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #f3c66b;
 }
 
+.lift-row input[type="number"] {
+  max-width: 90px;
+  background: #0a1d23;
+  border: 1px solid rgba(255,255,255,0.08);
+  color: #ffffff;
+  border-radius: 0.35rem;
+  padding: 0.25rem 0.4rem;
+}
+
+/* PHASE TABS */
+.phase-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.4rem;
+  border-radius: 1rem;
+}
+
+.phase-tabs .nav-link {
+  color: rgba(255,255,255,0.7);
+  font-weight: 600;
+  border-radius: 2rem;
+  padding: 0.35rem 0.6rem;
+  flex: 1 1 48%;
+  text-align: center;
+}
+
+.phase-tabs .nav-link.active {
+  background: #f3c66b;
+  color: #06171e;
+  padding: 0.35rem 0.5rem;
+}
+
+/* FOOTER */
 footer {
   text-align: center;
-  opacity: .6;
+  font-size: 0.7rem;
+  opacity: 0.6;
+  margin-top: 2.5rem;
 }
