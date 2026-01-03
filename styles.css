@@ -1,0 +1,173 @@
+/* ============================
+   GLOBAL RESET + BASE
+============================ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #2b3b5c;
+  color: #e9eef1;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+/* ============================
+   APP LAYOUT
+============================ */
+.app-container {
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 1rem 1rem 2.5rem;
+}
+
+@media (min-width: 768px) {
+  .app-container {
+    max-width: 520px;
+  }
+}
+
+/* ============================
+   TYPOGRAPHY
+============================ */
+.title {
+  text-align: center;
+  color: #f3c66b;
+  margin-bottom: 0.25rem;
+}
+
+.title-main {
+  display: block;
+  font-size: 2.2rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+}
+
+.title-sub {
+  display: block;
+  font-size: 1rem;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+
+.subtitle {
+  text-align: center;
+  font-size: 0.95rem;
+  opacity: 0.85;
+  margin-bottom: 1.25rem;
+}
+
+/* ============================
+   PHASE TABS
+============================ */
+.phase-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+  background: rgba(0,0,0,0.15);
+  border-radius: 1.1rem;
+  padding: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.phase-tabs .nav-link {
+  flex: 1 1 48%;
+  text-align: center;
+  color: rgba(255,255,255,0.7);
+  font-weight: 600;
+  padding: 0.35rem 0.55rem;
+  border-radius: 999px;
+  transition: all 0.2s ease;
+}
+
+.phase-tabs .nav-link.active {
+  background: #f3c66b;
+  color: #06171e;
+  padding: 0.35rem 0.45rem;
+}
+
+/* ============================
+   CARDS
+============================ */
+.card {
+  background: linear-gradient(145deg, #182944, #1f3756);
+  border-radius: 1.1rem;
+  padding: 1rem;
+  margin-bottom: 1.1rem;
+  box-shadow: 0 12px 35px rgba(0,0,0,0.55);
+}
+
+.card p {
+  margin-bottom: 0.5rem;
+  color: #f3c66b;
+  font-weight: 600;
+}
+
+/* ============================
+   LIFT ROWS
+============================ */
+.lift-row {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-bottom: 0.7rem;
+}
+
+.lift-row span {
+  flex: 1;
+  color: #ffffff;
+  font-size: 0.95rem;
+}
+
+/* ✅ THIS FIXES STRIKE-THROUGH */
+.lift-row input[type="checkbox"]:checked + span {
+  text-decoration: line-through;
+  color: rgba(255,255,255,0.5);
+}
+
+.lift-row input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #f3c66b;
+}
+
+.lift-row input[type="number"] {
+  max-width: 90px;
+  background: #0a1d23;
+  border: 1px solid rgba(255,255,255,0.15);
+  color: #ffffff;
+  border-radius: 0.35rem;
+  padding: 0.25rem;
+}
+
+/* ============================
+   PR TABLE
+============================ */
+.pr-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.pr-table th,
+.pr-table td {
+  padding: 0.45rem;
+  font-size: 0.85rem;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.pr-table th {
+  color: #f3c66b;
+}
+
+/* ============================
+   FOOTER
+============================ */
+footer {
+  text-align: center;
+  font-size: 0.7rem;
+  opacity: 0.6;
+  margin-top: 2.5rem;
+}
