@@ -1,9 +1,10 @@
 /* ============================
-   PROGRAM DATA (Restored)
+   PROGRAM DATA
 ============================ */
 const programBlocks = {
   1: { 
     label: "Weeks 1–3", 
+    weeks: [1, 2, 3],
     days: { 
       1: { title: "Back & Rear Delts", lifts: ["Deadlifts","Pull-Ups","Single-Arm DB Rows","T-Bar Rows","Bent-Over Lateral Raises"] }, 
       2: { title: "Chest & Ant/Lat Delts", lifts: ["Incline DB Press","Flat Bench Press","Landmine Press","Dumbbell Flys","Alt DB Front Raises","Lateral Raises"] }, 
@@ -13,6 +14,7 @@ const programBlocks = {
   },
   2: { 
     label: "Weeks 4–6", 
+    weeks: [4, 5, 6],
     days: { 
       1: { title: "Legs & Calves", lifts: ["Squats","Step-Ups","Trap Bar Deadlifts","Lateral Box Squats","Romanian Deadlifts","Seated Calf Raises"] }, 
       2: { title: "Back, Traps & Biceps", lifts: ["Incline DB Curls","Dumbbell Shrugs","Dumbbell Pullovers","Bent-Over Rows (Smith)","V-Grip Pull-Ups","Drag Curls"] }, 
@@ -22,6 +24,7 @@ const programBlocks = {
   },
   3: { 
     label: "Weeks 7–9", 
+    weeks: [7, 8, 9],
     days: { 
       1: { title: "Back & Trapezius", lifts: ["Pull-Ups","T-Bar Rows","Pendlay Rows","Dumbbell Pullovers","Rack Pulls","Barbell Shurgs"] }, 
       2: { title: "Chest", lifts: ["Barbell Press (Smith)","Incline DB Press","Dumbbell Flys","Weighted Dips","Cable Crossovers","Landmine Press"] }, 
@@ -31,6 +34,7 @@ const programBlocks = {
   },
   4: { 
     label: "Weeks 10–12", 
+    weeks: [10, 11, 12],
     days: { 
       1: { title: "Back & Chest", lifts: ["Flat DB Bench Press","Dumbbell Pullovers","Straight-Arm Pulldowns","Incline DB Flys","Bent-Over DB Rows","Pull-Ups"] }, 
       2: { title: "Legs", lifts: ["Squats","Romanian Deadlifts","Walking Lunges","Leg Extensions","Hamstring Curls","Standing Calf Raises"] }, 
@@ -45,6 +49,7 @@ const programBlocks = {
 ============================ */
 const userSelect = document.getElementById("userSelect");
 const phaseTabs = document.getElementById("phaseTabs");
+const weekTabs = document.getElementById("weekTabs"); // NEW
 const phaseContent = document.getElementById("phaseContent");
 const resetBtn = document.getElementById("resetBtn");
 
@@ -52,8 +57,9 @@ const resetBtn = document.getElementById("resetBtn");
 let currentUser = localStorage.getItem("lastUser") || "Zach";
 userSelect.value = currentUser;
 
-function getKey(block, day, lift) {
-  return `${currentUser}-b${block}-d${day}-${lift}`;
+// Update key format to include Week Number
+function getKey(block, week, day, lift) {
+  return `${currentUser}-w${week}-b${block}-d${day}-${lift}`;
 }
 
 /* ============================
@@ -76,62 +82,118 @@ function renderTabs() {
       document.querySelectorAll(".phase-tabs .nav-link").forEach(b => b.classList.remove("active"));
       btn.classList.add("active");
       
-      // Save this preference for THIS user
       localStorage.setItem(`${currentUser}-activeBlock`, blockId);
-      renderBlock(blockId);
+      // When switching phase, default to the first week of that phase
+      renderWeeks(blockId, data.weeks[0]);
     };
     
     phaseTabs.appendChild(btn);
   });
 
-  // Load the content for the active block
-  renderBlock(lastBlockForUser);
+  // Load the weeks for the active block
+  renderWeeks(lastBlockForUser);
 }
 
-function renderBlock(blockId) {
+function renderWeeks(blockId, targetWeek = null) {
+  weekTabs.innerHTML = "";
+  const blockData = programBlocks[blockId];
+  
+  // Try to find the last active week for this block, or default to first
+  let activeWeek = targetWeek;
+  if (!activeWeek) {
+     activeWeek = parseInt(localStorage.getItem(`${currentUser}-activeWeek-b${blockId}`)) || blockData.weeks[0];
+  }
+
+  blockData.weeks.forEach(weekNum => {
+    const btn = document.createElement("button");
+    btn.className = `nav-link ${weekNum === activeWeek ? "active" : ""}`;
+    btn.textContent = `Week ${weekNum}`;
+    
+    btn.onclick = () => {
+      document.querySelectorAll(".week-tabs .nav-link").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      
+      localStorage.setItem(`${currentUser}-activeWeek-b${blockId}`, weekNum);
+      renderWorkoutCards(blockId, weekNum);
+    };
+    
+    weekTabs.appendChild(btn);
+  });
+
+  // Render the cards for the active week
+  renderWorkoutCards(blockId, activeWeek);
+}
+
+function renderWorkoutCards(blockId, weekNum) {
   phaseContent.innerHTML = "";
   const blockData = programBlocks[blockId];
 
-  // Week Start Input
-  const weekStartKey = `${currentUser}-weekStart-${blockId}`;
+  // Calculate Previous Week for Ghost Text logic
+  // "Ghost" only appears if we are NOT on the first week of the block
+  const isFirstWeekOfBlock = weekNum === blockData.weeks[0];
+  const prevWeekNum = isFirstWeekOfBlock ? null : weekNum - 1;
+
+  // 1. Week Start Date Input
+  const weekStartKey = `${currentUser}-weekStart-w${weekNum}`;
   const weekStartDiv = document.createElement("div");
   weekStartDiv.className = "mb-3 text-center";
   weekStartDiv.innerHTML = `
-    <div class="small mb-2" style="color:var(--gold); font-weight:bold;">Welcome back, ${currentUser}!</div>
+    <div class="small mb-2" style="color:var(--gold); font-weight:bold;">${currentUser} • Week ${weekNum}</div>
     <label class="text-white small opacity-75">Week Start Date</label>
     <input type="text" 
            class="form-control form-control-sm mx-auto mt-1 text-center" 
-           placeholder="MM/DD/YYYY" 
+           placeholder="Date" 
            style="max-width: 150px; background: rgba(255,255,255,0.1); color: white; border: none;"
            value="${localStorage.getItem(weekStartKey) || ''}">
   `;
-  
   weekStartDiv.querySelector("input").addEventListener("input", (e) => {
     localStorage.setItem(weekStartKey, e.target.value);
   });
   phaseContent.appendChild(weekStartDiv);
 
-  // Workout Cards
+  // 2. Render Cards
   Object.entries(blockData.days).forEach(([dayNum, day]) => {
     const card = document.createElement("div");
     card.className = "card p-3 mb-3";
     
     const liftsHtml = day.lifts.map(lift => {
-      const isDone = localStorage.getItem(getKey(blockId, dayNum, lift)) === "done";
-      const weightVal = localStorage.getItem(getKey(blockId, dayNum, lift + '-weight')) || "";
-      const repsVal = localStorage.getItem(getKey(blockId, dayNum, lift + '-reps')) || "";
+      // Current Data
+      const currentKeyPrefix = getKey(blockId, weekNum, dayNum, lift);
+      const isDone = localStorage.getItem(currentKeyPrefix) === "done";
+      const weightVal = localStorage.getItem(currentKeyPrefix + '-weight') || "";
+      const repsVal = localStorage.getItem(currentKeyPrefix + '-reps') || "";
+      
+      // Ghost Data (Previous Week)
+      let ghostText = "";
+      if (prevWeekNum) {
+        const prevKeyPrefix = getKey(blockId, prevWeekNum, dayNum, lift);
+        const prevWeight = localStorage.getItem(prevKeyPrefix + '-weight');
+        const prevReps = localStorage.getItem(prevKeyPrefix + '-reps');
+        
+        if (prevWeight || prevReps) {
+          ghostText = `${prevWeight || 0}lbs x ${prevReps || 0}`;
+        }
+      }
       
       return `
         <div class="lift-row ${isDone ? 'completed' : ''}" data-lift="${lift}">
           <input type="checkbox" ${isDone ? 'checked' : ''}>
           <span>${lift}</span>
-          <input type="number" class="weight-input" placeholder="lbs" value="${weightVal}">
-          <input type="number" class="reps-input" placeholder="reps" value="${repsVal}">
+          
+          <div class="input-wrapper">
+            <input type="number" class="weight-input" placeholder="lbs" value="${weightVal}">
+            <div class="ghost-text">${ghostText}</div>
+          </div>
+          
+          <div class="input-wrapper">
+            <input type="number" class="reps-input" placeholder="reps" value="${repsVal}">
+          </div>
         </div>
       `;
     }).join("");
 
-    const stairKey = getKey(blockId, dayNum, "StairClimber");
+    // StairClimber Logic (Per Week)
+    const stairKey = getKey(blockId, weekNum, dayNum, "StairClimber");
     const stairDone = localStorage.getItem(stairKey) === "done";
     
     card.innerHTML = `
@@ -143,27 +205,30 @@ function renderBlock(blockId) {
       </div>
     `;
 
+    // Event Delegation
     card.addEventListener('change', (e) => {
       const row = e.target.closest('.lift-row');
       if (!row) return;
       const liftName = row.dataset.lift;
 
+      // Checkbox Logic
       if (e.target.type === 'checkbox') {
+        const key = getKey(blockId, weekNum, dayNum, liftName);
         if (e.target.checked) {
           row.classList.add("completed");
-          localStorage.setItem(getKey(blockId, dayNum, liftName), "done");
+          localStorage.setItem(key, "done");
         } else {
           row.classList.remove("completed");
-          localStorage.removeItem(getKey(blockId, dayNum, liftName));
+          localStorage.removeItem(key);
         }
       }
 
+      // Input Logic
       if (e.target.classList.contains('weight-input')) {
-        localStorage.setItem(getKey(blockId, dayNum, liftName + '-weight'), e.target.value);
+        localStorage.setItem(getKey(blockId, weekNum, dayNum, liftName + '-weight'), e.target.value);
       }
-      
       if (e.target.classList.contains('reps-input')) {
-        localStorage.setItem(getKey(blockId, dayNum, liftName + '-reps'), e.target.value);
+        localStorage.setItem(getKey(blockId, weekNum, dayNum, liftName + '-reps'), e.target.value);
       }
     });
 
@@ -188,31 +253,38 @@ resetBtn.addEventListener("click", () => {
 });
 
 /* ============================
-   INITIALIZATION
-============================ */
-renderTabs();
-
-/* ============================
    EXPORT DATA TO EMAIL (CSV)
 ============================ */
 const exportBtn = document.getElementById("exportBtn");
 
 exportBtn.addEventListener("click", () => {
   let csvContent = `Athlete: ${currentUser}\n`;
-  csvContent += "Block,Day,Exercise,Weight (lbs),Reps,Status\n";
+  csvContent += "Phase,Week,Day,Exercise,Weight (lbs),Reps,Status\n";
 
+  // Loop Blocks
   Object.entries(programBlocks).forEach(([blockId, blockData]) => {
-    Object.entries(blockData.days).forEach(([dayNum, day]) => {
-      day.lifts.forEach(lift => {
-        const weight = localStorage.getItem(getKey(blockId, dayNum, lift + '-weight')) || "0";
-        const reps = localStorage.getItem(getKey(blockId, dayNum, lift + '-reps')) || "0";
-        const status = localStorage.getItem(getKey(blockId, dayNum, lift)) === "done" ? "Completed" : "Incomplete";
-        
-        csvContent += `"${blockData.label}","Day ${dayNum}","${lift}","${weight}","${reps}","${status}"\n`;
-      });
-      
-      const stairStatus = localStorage.getItem(getKey(blockId, dayNum, "StairClimber")) === "done" ? "Completed" : "Incomplete";
-      csvContent += `"${blockData.label}","Day ${dayNum}","StairClimber","N/A","N/A","${stairStatus}"\n`;
+    // Loop Weeks in Block
+    blockData.weeks.forEach(weekNum => {
+        // Loop Days
+        Object.entries(blockData.days).forEach(([dayNum, day]) => {
+            // Loop Lifts
+            day.lifts.forEach(lift => {
+                const prefix = getKey(blockId, weekNum, dayNum, lift);
+                
+                const weight = localStorage.getItem(prefix + '-weight') || "0";
+                const reps = localStorage.getItem(prefix + '-reps') || "0";
+                const status = localStorage.getItem(prefix) === "done" ? "Completed" : "Incomplete";
+                
+                // Only add rows that have data or are marked done to keep CSV clean? 
+                // Or export everything. Let's export everything for completeness.
+                csvContent += `"${blockData.label}","Week ${weekNum}","Day ${dayNum}","${lift}","${weight}","${reps}","${status}"\n`;
+            });
+
+            // StairClimber
+            const stairKey = getKey(blockId, weekNum, dayNum, "StairClimber");
+            const stairStatus = localStorage.getItem(stairKey) === "done" ? "Completed" : "Incomplete";
+            csvContent += `"${blockData.label}","Week ${weekNum}","Day ${dayNum}","StairClimber","N/A","N/A","${stairStatus}"\n`;
+        });
     });
   });
 
@@ -221,6 +293,7 @@ exportBtn.addEventListener("click", () => {
   
   window.location.href = `mailto:?subject=${subject}&body=${body}`;
   
+  // Download Blob
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
@@ -232,4 +305,7 @@ exportBtn.addEventListener("click", () => {
   document.body.removeChild(link);
 });
 
-
+/* ============================
+   INITIALIZATION
+============================ */
+renderTabs();
