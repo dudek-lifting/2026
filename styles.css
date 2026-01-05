@@ -50,18 +50,31 @@ body {
 }
 
 /* ============================
-   COMPACT USER SELECTOR
+   COMPACT USER SELECTOR (Updated)
 ============================ */
 .user-dropdown-compact {
   background-color: rgba(255,255,255,0.05);
   color: var(--gold);
   border: 1px solid rgba(255,255,255,0.1);
+  
+  /* Centering Logic */
   text-align: center;
+  text-align-last: center; /* Specifically for dropdown values */
+  
   font-weight: 700;
   font-size: 0.9rem;
-  padding: 6px 12px;
+  padding: 6px 0; /* Padding on top/bottom, 0 on sides to keep it narrow */
   border-radius: 20px;
   cursor: pointer;
+  
+  /* Width Logic */
+  width: 100px; /* Perfect for 5-letter names */
+  margin: 0 auto;
+  display: block; /* Ensures margin: auto works to center the box itself */
+  
+  /* Remove default browser arrow if it causes off-centering on some phones */
+  appearance: none; 
+  -webkit-appearance: none;
 }
 
 .user-dropdown-compact:focus {
@@ -69,6 +82,7 @@ body {
   color: var(--gold);
   border-color: var(--gold);
   box-shadow: none;
+  outline: none;
 }
 
 /* ============================
