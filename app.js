@@ -49,7 +49,7 @@ const programBlocks = {
 ============================ */
 const userSelect = document.getElementById("userSelect");
 const phaseTabs = document.getElementById("phaseTabs");
-const weekTabs = document.getElementById("weekTabs"); // NEW
+const weekTabs = document.getElementById("weekTabs");
 const phaseContent = document.getElementById("phaseContent");
 const resetBtn = document.getElementById("resetBtn");
 
@@ -57,7 +57,6 @@ const resetBtn = document.getElementById("resetBtn");
 let currentUser = localStorage.getItem("lastUser") || "Zach";
 userSelect.value = currentUser;
 
-// Update key format to include Week Number
 function getKey(block, week, day, lift) {
   return `${currentUser}-w${week}-b${block}-d${day}-${lift}`;
 }
@@ -67,8 +66,6 @@ function getKey(block, week, day, lift) {
 ============================ */
 function renderTabs() {
   phaseTabs.innerHTML = "";
-  
-  // Find which block this specific user was on last
   const lastBlockForUser = localStorage.getItem(`${currentUser}-activeBlock`) || "1";
 
   Object.entries(programBlocks).forEach(([blockId, data]) => {
@@ -81,16 +78,13 @@ function renderTabs() {
     btn.onclick = () => {
       document.querySelectorAll(".phase-tabs .nav-link").forEach(b => b.classList.remove("active"));
       btn.classList.add("active");
-      
       localStorage.setItem(`${currentUser}-activeBlock`, blockId);
-      // When switching phase, default to the first week of that phase
       renderWeeks(blockId, data.weeks[0]);
     };
     
     phaseTabs.appendChild(btn);
   });
 
-  // Load the weeks for the active block
   renderWeeks(lastBlockForUser);
 }
 
@@ -98,7 +92,6 @@ function renderWeeks(blockId, targetWeek = null) {
   weekTabs.innerHTML = "";
   const blockData = programBlocks[blockId];
   
-  // Try to find the last active week for this block, or default to first
   let activeWeek = targetWeek;
   if (!activeWeek) {
      activeWeek = parseInt(localStorage.getItem(`${currentUser}-activeWeek-b${blockId}`)) || blockData.weeks[0];
@@ -112,7 +105,6 @@ function renderWeeks(blockId, targetWeek = null) {
     btn.onclick = () => {
       document.querySelectorAll(".week-tabs .nav-link").forEach(b => b.classList.remove("active"));
       btn.classList.add("active");
-      
       localStorage.setItem(`${currentUser}-activeWeek-b${blockId}`, weekNum);
       renderWorkoutCards(blockId, weekNum);
     };
@@ -120,7 +112,6 @@ function renderWeeks(blockId, targetWeek = null) {
     weekTabs.appendChild(btn);
   });
 
-  // Render the cards for the active week
   renderWorkoutCards(blockId, activeWeek);
 }
 
@@ -128,42 +119,21 @@ function renderWorkoutCards(blockId, weekNum) {
   phaseContent.innerHTML = "";
   const blockData = programBlocks[blockId];
 
-  // Calculate Previous Week for Ghost Text logic
-  // "Ghost" only appears if we are NOT on the first week of the block
   const isFirstWeekOfBlock = weekNum === blockData.weeks[0];
   const prevWeekNum = isFirstWeekOfBlock ? null : weekNum - 1;
 
-  // 1. Week Start Date Input
-  const weekStartKey = `${currentUser}-weekStart-w${weekNum}`;
-  const weekStartDiv = document.createElement("div");
-  weekStartDiv.className = "mb-3 text-center";
-  weekStartDiv.innerHTML = `
-    <div class="small mb-2" style="color:var(--gold); font-weight:bold;">${currentUser} • Week ${weekNum}</div>
-    <label class="text-white small opacity-75">Week Start Date</label>
-    <input type="text" 
-           class="form-control form-control-sm mx-auto mt-1 text-center" 
-           placeholder="Date" 
-           style="max-width: 150px; background: rgba(255,255,255,0.1); color: white; border: none;"
-           value="${localStorage.getItem(weekStartKey) || ''}">
-  `;
-  weekStartDiv.querySelector("input").addEventListener("input", (e) => {
-    localStorage.setItem(weekStartKey, e.target.value);
-  });
-  phaseContent.appendChild(weekStartDiv);
-
-  // 2. Render Cards
+  // 1. Render Cards
   Object.entries(blockData.days).forEach(([dayNum, day]) => {
     const card = document.createElement("div");
-    card.className = "card p-3 mb-3";
+    card.className = "card"; // Removed p-3 to control padding via CSS
     
     const liftsHtml = day.lifts.map(lift => {
-      // Current Data
       const currentKeyPrefix = getKey(blockId, weekNum, dayNum, lift);
       const isDone = localStorage.getItem(currentKeyPrefix) === "done";
       const weightVal = localStorage.getItem(currentKeyPrefix + '-weight') || "";
       const repsVal = localStorage.getItem(currentKeyPrefix + '-reps') || "";
       
-      // Ghost Data (Previous Week)
+      // Ghost Data
       let ghostText = "";
       if (prevWeekNum) {
         const prevKeyPrefix = getKey(blockId, prevWeekNum, dayNum, lift);
@@ -171,7 +141,7 @@ function renderWorkoutCards(blockId, weekNum) {
         const prevReps = localStorage.getItem(prevKeyPrefix + '-reps');
         
         if (prevWeight || prevReps) {
-          ghostText = `${prevWeight || 0}lbs x ${prevReps || 0}`;
+          ghostText = `${prevWeight || 0} x ${prevReps || 0}`;
         }
       }
       
@@ -192,7 +162,6 @@ function renderWorkoutCards(blockId, weekNum) {
       `;
     }).join("");
 
-    // StairClimber Logic (Per Week)
     const stairKey = getKey(blockId, weekNum, dayNum, "StairClimber");
     const stairDone = localStorage.getItem(stairKey) === "done";
     
@@ -211,7 +180,6 @@ function renderWorkoutCards(blockId, weekNum) {
       if (!row) return;
       const liftName = row.dataset.lift;
 
-      // Checkbox Logic
       if (e.target.type === 'checkbox') {
         const key = getKey(blockId, weekNum, dayNum, liftName);
         if (e.target.checked) {
@@ -223,7 +191,6 @@ function renderWorkoutCards(blockId, weekNum) {
         }
       }
 
-      // Input Logic
       if (e.target.classList.contains('weight-input')) {
         localStorage.setItem(getKey(blockId, weekNum, dayNum, liftName + '-weight'), e.target.value);
       }
@@ -234,6 +201,24 @@ function renderWorkoutCards(blockId, weekNum) {
 
     phaseContent.appendChild(card);
   });
+
+  // 2. Week Start Date Input (Moved to Bottom)
+  const weekStartKey = `${currentUser}-weekStart-w${weekNum}`;
+  const weekStartDiv = document.createElement("div");
+  weekStartDiv.className = "mt-4 mb-2 text-center";
+  weekStartDiv.innerHTML = `
+    <label class="text-white small opacity-50" style="font-size:0.7rem;">WEEK ${weekNum} START DATE</label>
+    <br>
+    <input type="text" 
+           class="form-control form-control-sm mx-auto mt-1 text-center" 
+           placeholder="MM/DD/YYYY" 
+           style="max-width: 140px; background: rgba(0,0,0,0.2); color: var(--gold); border: 1px solid rgba(255,255,255,0.1);"
+           value="${localStorage.getItem(weekStartKey) || ''}">
+  `;
+  weekStartDiv.querySelector("input").addEventListener("input", (e) => {
+    localStorage.setItem(weekStartKey, e.target.value);
+  });
+  phaseContent.appendChild(weekStartDiv);
 }
 
 /* ============================
@@ -261,26 +246,17 @@ exportBtn.addEventListener("click", () => {
   let csvContent = `Athlete: ${currentUser}\n`;
   csvContent += "Phase,Week,Day,Exercise,Weight (lbs),Reps,Status\n";
 
-  // Loop Blocks
   Object.entries(programBlocks).forEach(([blockId, blockData]) => {
-    // Loop Weeks in Block
     blockData.weeks.forEach(weekNum => {
-        // Loop Days
         Object.entries(blockData.days).forEach(([dayNum, day]) => {
-            // Loop Lifts
             day.lifts.forEach(lift => {
                 const prefix = getKey(blockId, weekNum, dayNum, lift);
-                
                 const weight = localStorage.getItem(prefix + '-weight') || "0";
                 const reps = localStorage.getItem(prefix + '-reps') || "0";
                 const status = localStorage.getItem(prefix) === "done" ? "Completed" : "Incomplete";
                 
-                // Only add rows that have data or are marked done to keep CSV clean? 
-                // Or export everything. Let's export everything for completeness.
                 csvContent += `"${blockData.label}","Week ${weekNum}","Day ${dayNum}","${lift}","${weight}","${reps}","${status}"\n`;
             });
-
-            // StairClimber
             const stairKey = getKey(blockId, weekNum, dayNum, "StairClimber");
             const stairStatus = localStorage.getItem(stairKey) === "done" ? "Completed" : "Incomplete";
             csvContent += `"${blockData.label}","Week ${weekNum}","Day ${dayNum}","StairClimber","N/A","N/A","${stairStatus}"\n`;
@@ -290,10 +266,8 @@ exportBtn.addEventListener("click", () => {
 
   const subject = encodeURIComponent(`${currentUser}'s Fitness Progress - Dudek & Boyd`);
   const body = encodeURIComponent(`Attached is my current workout progress data.\n\n--- DATA BELOW ---\n\n${csvContent}`);
-  
   window.location.href = `mailto:?subject=${subject}&body=${body}`;
   
-  // Download Blob
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
