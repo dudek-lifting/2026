@@ -122,27 +122,29 @@ body {
 ============================ */
 .lift-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start; /* Changed to start to handle vertical stacking */
   gap: 8px; 
   margin-bottom: 12px;
   padding: 4px 0;
 }
 
-/* Keep your custom Checkbox look */
+/* Checkbox styling */
 .lift-row input[type="checkbox"] {
   width: 24px;
   height: 24px;
   accent-color: var(--gold);
   cursor: pointer;
   flex-shrink: 0;
+  margin-top: 6px; /* Align with input box */
 }
 
-/* The text label for the lift - adjusted for 2 columns */
+/* The text label for the lift */
 .lift-row span {
   flex: 1; 
   font-size: 0.9rem;
   line-height: 1.2;
   color: white;
+  margin-top: 6px; /* Align with input box */
 }
 
 /* Completed state (strikethrough) */
@@ -150,6 +152,14 @@ body {
   text-decoration: line-through;
   color: var(--text-muted);
   opacity: 0.6;
+}
+
+/* Wraps the Input + Ghost Text */
+.input-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
 }
 
 /* Shared style for Weight and Reps */
@@ -164,13 +174,8 @@ body {
   font-size: 0.85rem;
 }
 
-.weight-input {
-  width: 58px;
-}
-
-.reps-input {
-  width: 42px;
-}
+.weight-input { width: 58px; }
+.reps-input { width: 42px; }
 
 .weight-input:focus, .reps-input:focus {
   outline: none;
@@ -184,20 +189,28 @@ body {
   font-weight: normal;
 }
 
+/* GHOST TEXT (Previous Week Stats) */
+.ghost-text {
+  font-size: 0.6rem;
+  color: rgba(255, 255, 255, 0.4);
+  margin-top: 3px;
+  height: 10px; /* Reserve height so layout doesn't jump */
+  white-space: nowrap;
+}
+
 /* ============================
-   PHASE TABS (2x2 Grid Fix)
+   PHASE TABS (2x2 Grid)
 ============================ */
 .phase-tabs {
   display: flex;
-  flex-wrap: wrap; /* Allows tabs to wrap to the next line */
-  gap: 8px;        /* Spacing between tabs */
+  flex-wrap: wrap; 
+  gap: 8px;      
   padding: 0;
   margin: 0 auto 1.5rem auto;
   width: 100%;
 }
 
 .phase-tabs .nav-link {
-  /* This calculation (50% minus half the gap) forces a 2x2 grid */
   flex: 0 0 calc(50% - 4px); 
   color: var(--text-muted);
   background: rgba(255,255,255,0.05);
@@ -217,6 +230,32 @@ body {
 }
 
 /* ============================
+   WEEK TABS (New)
+============================ */
+.week-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding: 0;
+  margin-bottom: 1.5rem;
+}
+
+.week-tabs .nav-link {
+  color: var(--text-main);
+  background: rgba(0,0,0,0.2);
+  border-radius: 20px;
+  font-size: 0.8rem;
+  padding: 6px 16px;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+
+.week-tabs .nav-link.active {
+  background-color: var(--card-bg);
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+/* ============================
    FOOTER
 ============================ */
 footer {
@@ -228,26 +267,25 @@ footer {
 }
 
 /* ============================
-   EXPORT BUTTON STYLE FIX
+   EXPORT BUTTON
 ============================ */
 #exportBtn.btn-gold {
-  background-color: #f3c66b !important; /* Force high-visibility gold */
-  color: #121c2f !important;            /* Force dark navy text */
+  background-color: #f3c66b !important; 
+  color: #121c2f !important;            
   font-weight: 800 !important;
   text-transform: uppercase;
   letter-spacing: 1px;
   border: none;
   padding: 12px 20px;
   border-radius: 10px;
-  width: 80% !important;                /* Better mobile hit area */
+  width: 80% !important;               
   margin: 20px auto;
-  display: block;                       /* Centers it as a block element */
+  display: block;                       
   box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-  opacity: 1 !important;                /* Ensure no transparency is inherited */
+  opacity: 1 !important;                
 }
 
 #exportBtn.btn-gold:active {
   transform: scale(0.98);
   background-color: #e2b55a !important;
 }
-
